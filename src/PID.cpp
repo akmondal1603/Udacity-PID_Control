@@ -23,7 +23,7 @@ void PID::Init(double Kp_, double Ki_, double Kd_) {
   d_error=0.0;
   i_error=0.0;
   
-  prev_cte=0.0;
+  prev_cte=9999.9;
   
  
 
@@ -50,7 +50,7 @@ double PID::TotalError() {
   return error_total;  // TODO: Add your total error calc here!
 }
 
-vector<double> PID::twiddle(double cte)
+std::vector<double> PID::twiddle(double cte)
 {
   //std::vector<double> p = {0.0005, 0, 2.5};
   std::vector<double> p = {0.0, 0.0, 0.0};

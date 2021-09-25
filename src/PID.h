@@ -1,5 +1,8 @@
 #ifndef PID_H
 #define PID_H
+#include <vector>
+#include <stdlib.h>
+#include <cmath>
 
 class PID {
  public:
@@ -31,7 +34,7 @@ class PID {
    */
   double TotalError();
   
-  vector<double> twiddle(double cte);
+  std::vector<double> twiddle(double cte);
   
  
 
@@ -52,6 +55,7 @@ class PID {
   
   double prev_cte;
   double error_total;
+  double best_err;
 //};
 
 
