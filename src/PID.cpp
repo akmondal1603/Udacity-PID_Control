@@ -38,6 +38,7 @@ void PID::UpdateError(double cte) {
   d_error=prev_cte-cte;
   prev_cte=cte;
   i_error+=cte;
+  cte=PID::twiddle(0.0);
   
  
 }
@@ -92,7 +93,7 @@ std::vector<double> PID::twiddle(double cte)
         }
       }
     }
-    return p;
+    return best_err;
   }
 }
 
