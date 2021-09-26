@@ -1,100 +1,92 @@
 #include "PID.h"
-#include <cmath>
+#include <iostream>
+#include <string>
 #include <vector>
+#include <cmath>
 #include <stdlib.h>
-
-/**
- * TODO: Complete the PID class. You may add any additional desired functions.
- */
+using std::string;
 
 PID::PID() {}
 
 PID::~PID() {}
 
 void PID::Init(double Kp_, double Ki_, double Kd_) {
-  /**
-   * TODO: Initialize PID coefficients (and errors, if needed)
-   */
-  PID::Kp=Kp_;
-  PID::Kd=Kd_;
-  PID::Ki=Ki_;
-  
+  Kp = Kp_;
+  Ki = Ki_;
+  Kd = Kd_;
   p_error=0.0;
   d_error=0.0;
   i_error=0.0;
   
-  prev_cte=9999.9;
-  
- 
+  prev_cte = 0.0;
 
+  best_err = 0.0;
+  current_err = 0.0;
+
+  twiddle_call = 0;
 }
 
 void PID::UpdateError(double cte) {
-  /**
-   * TODO: Update PID errors based on cte.
-   */
-  //PID::Init;
-  p_error=cte;
-  d_error=prev_cte-cte;
-  prev_cte=cte;
-  i_error+=cte;
-  cte=PID::twiddle(0.0);
-  
- 
+  //accum_cte += cte;
+  // Update PID errors based on CTE.
+  p_error = cte;
+  i_error += cte;
+  d_error = cte-prev_cte;
+  prev_cte = cte;
 }
 
 double PID::TotalError() {
-  /**
-   * TODO: Calculate and return the total error
-   */
-  double error_total = Kp*p_error + Kd*d_error + Ki*i_error;
-  return error_total;  // TODO: Add your total error calc here!
+  // Calculate and return the total error
+  return -(Kp * p_error + Kd * d_error + Ki * i_error);
 }
 
-std::vector<double> PID::twiddle(double cte)
+void PID::twiddle(double tol, double cte) 
 {
-  //std::vector<double> p = {0.0005, 0, 2.5};
+  twiddle_call += 1;
+  current_err += (cte * cte);
+  current_err /= twiddle_call;
+  best_err = (cte * cte);
   std::vector<double> p = {0.0, 0.0, 0.0};
-  std::vector<double> dp = {1.,1.,1.};
-  double best_err=TotalError();
-  double tol=0.2;
+  std::vector<double> dp = {1.0,1.0,1.0};
   double sum = dp[0]+dp[1]+dp[2];
-  while(sum>tol)
+  int it = 0;
+  while (sum > tol) 
   {
-    for (int i=0; i<p.size(); i++)
+    for (int i=0; i<3; i++) 
     {
-      p[i]+=dp[i];
-      
+      p[i] += dp[i];
       Kp=p[0];
       Ki=p[1];
       Kd=p[2];
-      double err=TotalError();
-      if (abs(err)<best_err)
-      {
-        best_err=err;
-        dp[i]*=1.1;
+
+      if (current_err < best_err) 
+      { // There was some improvement
+
+        best_err = current_err;
+        dp[i] *= 1.1;
       }
-      else
-      {
-        p[i]-=2*dp[i];
+      else 
+      { // No improvement
+     
+        p[i] -= 2 * dp[i];
         Kp=p[0];
-      	Ki=p[1];
-      	Kd=p[2];
-      	double err=TotalError();
-        if (abs(err)<best_err)
-        {
-          best_err=abs(err);
-          dp[i]*=1.1;
+        Ki=p[1];
+        Kd=p[2];
+        
+        if (current_err < best_err) 
+        { // There was an improvement
+          //std::cout << "loop 2a" << std::endl;
+          best_err = current_err;
+          dp[i] *= 1.1;
         }
-        else
-        {
-          p[i]+=dp[i];
-          dp[i]*=0.9;
+        else 
+        { 
+          p[i] += dp[0];
+          dp[i] *= 0.9;
         }
       }
     }
-    return best_err;
+    it += 1;
   }
 }
-
 
