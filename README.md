@@ -10,31 +10,15 @@ Self-Driving Car Engineer Nanodegree Program
 
 ## Methodology
 
-Cross Track Error (CTE) is the car's deviation from the centre line of the concerned lane. This CTE acts as the basis of PID controller. CTE directly gives the proportional error 'P'. Differential error 'D' is calculated via measuring the difference between the previous and current CTE. D acts as a damping factor and acts swiftly. To smoothen this transition integral error 'I' is added. I is the sum of all the differental errors over the time. It helps in gazing the damping rate and corrects the fall. 
-For the current project, hyperparameters are tuned using twiddle algorithm.
+The PiD control alogorithm works on the basis of Cross Track Error (CTE) provided by the simulator. It is the car's deviation from the centre line of the concerned lane. This CTE acts as the basis of PID controller. CTE directly gives the proportional error 'P'. But in this project it always overshoots, resulting oscillation and finally offtrack. Differential error 'D' is calculated via measuring the difference between the previous and current CTE. D acts as a damping factor and acts swiftly. To smoothen this transition integral error 'I' is added. I is the sum of all the differental errors over the time. It helps in gazing the damping rate and corrects the fall. All these error values are summed up and used for steering angle control. In relaity, throttle is also controlled.  
 
-## Dependencies
+For the current project PID implementation, hyperparameters are optimized using twiddle algorithm. While tuning the hyperparameters, initially all the values were taken 0.
+1. Initially a small Kp value of 0.1 was passed, but that work terreibly. So I reduce down the value (to 0.01) and tried to check where the vehicle atleast stayed in track or atleast for a good amount of time, although swerving movement was there. Then I slowly increased the value with incrementing the Kd value in parallel. I used Kp=0.04.
+2. I refferd the nowledge section, and I started the value of Kd with 1 and I tried to use a lot of combinations with Kp. I used Kd=4.5. 
+3. Ki doesn't have much effect in this partcular case, but increasing its value is causing swerving movement. I kept its value at 0.001.
 
-* cmake >= 3.5
- * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1(mac, linux), 3.81(Windows)
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
-* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
-  * Run either `./install-mac.sh` or `./install-ubuntu.sh`.
-  * If you install from source, checkout to commit `e94b6e1`, i.e.
-    ```
-    git clone https://github.com/uWebSockets/uWebSockets 
-    cd uWebSockets
-    git checkout e94b6e1
-    ```
-    Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
-* Simulator. You can download these from the [project intro page](https://github.com/udacity/self-driving-car-sim/releases) in the classroom.
+## Twiddle Algorithm
 
-Fellow students have put together a guide to Windows set-up for the project [here](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/files/Kidnapped_Vehicle_Windows_Setup.pdf) if the environment you have set up for the Sensor Fusion projects does not work for this project. There's also an experimental patch for windows in this [PR](https://github.com/udacity/CarND-PID-Control-Project/pull/3).
+Twiddle algorithm continously tunes the hyperparametrs by continously monitoring the CTE. Basically if the CTE value increases or decreases, twiddle algorithm also increase of decrease the hyperparameters to keep the smallest CTE.
+
 
